@@ -165,7 +165,7 @@ def delete_collection(collection_id: str):
         raise HTTPException(status_code=404, detail="Collection not found")
     
     # Handle orphaned prompts
-    prompts = storage.get_prompts_by_collection_id(collection_id)
+    prompts = storage.get_prompts_by_collection(collection_id)
     for prompt in prompts:
         # Option 1: Delete the prompts
         storage.delete_prompt(prompt.id)

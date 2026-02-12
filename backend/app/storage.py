@@ -67,3 +67,4 @@ class Storage:
 
 # Global storage instance
 storage = Storage()
+

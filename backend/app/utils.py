@@ -1,7 +1,7 @@
 """Utility functions for PromptLab"""
 
 from typing import List
-from app.models import Prompt
+from app.models import Prompt, PromptUpdate
 from datetime import datetime
 
 def sort_prompts_by_date(prompts: List[Prompt], descending: bool = True) -> List[Prompt]:

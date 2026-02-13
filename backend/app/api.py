@@ -11,7 +11,7 @@ from app.models import (
     PromptList, CollectionList, HealthResponse,
     get_current_time
 )
-from app.storage import storage
+from app.SQLLiteStorage import storage
 from app.utils import sort_prompts_by_date, filter_prompts_by_collection, search_prompts, apply_partial_updates
 from app import __version__
 

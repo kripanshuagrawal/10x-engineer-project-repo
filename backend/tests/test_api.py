@@ -31,7 +31,7 @@ class TestPrompts:
 # ============================================================================
 
     # Add missing fixtures for setup and teardown as needed
-    @pytest.fixture
+    @pytest.fixture(scope="module")
     def valid_prompt_data(self):
         """Fixture with valid prompt data."""
         return {
@@ -39,7 +39,7 @@ class TestPrompts:
             "content": "This is some test content."
         }
 
-    @pytest.fixture
+    @pytest.fixture(scope="module")
     def created_prompt(self):
         """Fixture to create and return a test prompt."""
         prompt_data = {
@@ -53,9 +53,6 @@ class TestPrompts:
 # ============================================================================
 # TEST: List Prompts Endpoint
 # ============================================================================
-
-class TestListPrompts:
-    """Tests for listing prompts."""
 
     # Happy Path
     def test_list_prompts_all(self):
@@ -126,6 +123,10 @@ class TestListPrompts:
         response = client.get(f'/prompts?collection_id={created_collection_id}&search=query')
         assert response.status_code == 200
 
+    def test_list_prompts_invalid_collection_id_format(self):
+        """Test listing prompts with invalid collection ID format."""
+        response = client.get('/prompts?collection_id=12345')
+        assert response.status_code == 400  # Assuming validation checks on UUID
 # ============================================================================
     # TEST: Retrieve Prompt by ID
     # ============================================================================
@@ -147,6 +148,31 @@ class TestListPrompts:
         response = client.get('/prompts/00000000-0000-0000-0000-000000000000')
         assert response.status_code == 404
     
+    def test_get_prompt_valid_id(self, created_prompt):
+        """Test retrieving a prompt with a valid ID."""
+        prompt_id = created_prompt['id']
+        response = client.get(f'/prompts/{prompt_id}')
+        assert response.status_code == 200
+        assert response.json()['title'] == created_prompt['title']
+
+    def test_get_prompt_invalid_id_format(self):
+        """Test retrieving a prompt with an invalid ID format returns 404."""
+        response = client.get('/prompts/invalid-format')
+        assert response.status_code == 404
+
+    def test_get_prompt_malformed_id(self):
+        """Test retrieving a prompt with a malformed ID returns 400."""
+        response = client.get('/prompts/!@#%-id')
+        assert response.status_code == 400
+        assert 'Malformed prompt ID' in response.json().get('detail', '')
+
+    def test_get_prompt_excessively_long_id(self):
+        """Test retrieving a prompt with an excessively long ID returns 400."""
+        long_id = 'a' * 1000  # Assume 1000 chars is excessively long
+        response = client.get(f'/prompts/{long_id}')
+        assert response.status_code == 400
+        assert 'Invalid ID format' in response.json().get('detail', '')
+    
     # ============================================================================
     # TEST: Create Prompt
     # ============================================================================
@@ -166,6 +192,29 @@ class TestListPrompts:
         """Test posting an empty JSON returns 422."""
         response = client.post('/prompts', json={})
         assert response.status_code == 422
+    
+    def test_create_prompt_with_long_title_and_content(self):
+        """Test creating a prompt with excessively long title and content."""
+        long_title = 'a' * 256
+        long_content = 'b' * 1024  # Assuming these lengths are excessive
+        response = client.post('/prompts', json={"title": long_title, "content": long_content})
+        assert response.status_code == 422  # Assuming validation fails for long input
+
+    def test_create_prompt_with_special_characters(self):
+        """Test creating a prompt with special characters in title and content."""
+        special_title = "!@#%^&*()_+=-[]{}|;:'<>,.?/~`"
+        special_content = "Content!@#%^&*()"
+        response = client.post('/prompts', json={"title": special_title, "content": special_content})
+        assert response.status_code == 201
+        assert response.json()['title'] == special_title
+
+    def test_create_prompt_with_duplicate_title(self):
+        """Test creating a prompt with a duplicate title."""
+        # Assuming titles should be unique within a collection or system
+        prompt_data = {"title": "Duplicate Title", "content": "Content for duplicate title."}
+        client.post('/prompts', json=prompt_data)  # Create the initial prompt
+        response = client.post('/prompts', json=prompt_data)  # Attempt to create a duplicate
+        assert response.status_code == 409  # Assuming 409 Conflict for duplicates
     
     # ============================================================================
     # TEST: Update Prompt

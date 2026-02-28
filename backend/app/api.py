@@ -126,6 +126,13 @@ def get_prompt(prompt_id: str):
         >>> prompt = get_prompt("example_prompt_id")
         >>> print(prompt.title)
     """
+    # Validate prompt ID format
+    if not all(c.isalnum() or c == '-' for c in prompt_id):
+        raise HTTPException(status_code=400, detail="Malformed prompt ID")
+    
+    if len(prompt_id) > 255:
+        raise HTTPException(status_code=400, detail="Invalid ID format")
+    
     # Retrieve the prompt using the provided ID
     prompt = storage.get_prompt(prompt_id)
 
@@ -178,6 +185,11 @@ def create_prompt(prompt_data: PromptCreate):
         collection = storage.get_collection(prompt_data.collection_id)
         if not collection:
             raise HTTPException(status_code=400, detail="Collection not found")
+    
+    # Check for duplicate title
+    existing_prompt = storage.get_prompt_by_title(prompt_data.title, prompt_data.collection_id)
+    if existing_prompt:
+        raise HTTPException(status_code=409, detail="Prompt with this title already exists")
     
     prompt = Prompt(**prompt_data.model_dump())
     return storage.create_prompt(prompt)
@@ -399,4 +411,5 @@ def delete_collection(collection_id: str):
         # Option 1: Delete the prompts
         storage.delete_prompt(prompt.id)
     return None
+
 

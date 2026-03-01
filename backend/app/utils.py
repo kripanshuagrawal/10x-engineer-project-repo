@@ -5,6 +5,7 @@ from app.models import Prompt, PromptUpdate
 from datetime import datetime
 from typing import Tuple, Optional
 
+
 def sort_prompts_by_date(prompts: List[Prompt], descending: bool = True) -> List[Prompt]:
     """Sort prompts by their creation date.
 
@@ -77,7 +78,7 @@ def search_prompts(prompts: List[Prompt], query: str) -> List[Prompt]:
     return [
         p for p in prompts
         if query_lower in p.title.lower() or
-           (p.description and query_lower in p.description.lower())
+        (p.description and query_lower in p.description.lower())
     ]
 
 
@@ -114,7 +115,7 @@ def validate_prompt_content(content: str) -> bool:
 
 def extract_variables(content: str) -> List[str]:
     """Extract template variables from prompt content.
-    
+
     This function scans the given string for template variables that are enclosed in double curly braces (`{{variable_name}}`). It returns a list of all variable names found within the string.
 
     Args:
@@ -133,6 +134,7 @@ def extract_variables(content: str) -> List[str]:
     import re
     pattern = r'\{\{(\w+)\}\}'
     return re.findall(pattern, content)
+
 
 def apply_partial_updates(existing_data: Prompt, update_data: PromptUpdate) -> Prompt:
     """Apply partial updates to a prompt, updating only provided fields.
@@ -167,20 +169,21 @@ def apply_partial_updates(existing_data: Prompt, update_data: PromptUpdate) -> P
     updated_data['updated_at'] = datetime.utcnow()
     return Prompt(**updated_data)
 
+
 def validate_prompt_id(prompt_id: str) -> Tuple[bool, Optional[str]]:
     """Validate prompt ID format.
-    
+
     Args:
         prompt_id (str): The prompt ID to validate.
-    
+
     Returns:
         Tuple[bool, Optional[str]]: A tuple containing a boolean indicating if the 
         ID is valid, and an error message if invalid.
     """
     if not all(c.isalnum() or c == '-' for c in prompt_id):
         return False, "Malformed prompt ID"
-    
+
     if len(prompt_id) > 255:
         return False, "Invalid ID format"
-    
+
     return True, None

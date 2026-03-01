@@ -92,8 +92,10 @@ class TestEdgeCases:
 
     def test_create_duplicate_prompt_ids(self, storage):
         """Test creating prompts with duplicate IDs does not overwrite existing prompt."""
-        prompt_1 = Prompt(id='1', title='Prompt One', content='Content one.', collection_id='100')
-        prompt_2 = Prompt(id='1', title='Duplicate Prompt', content='Content two.', collection_id='100')
+        prompt_1 = Prompt(id='1', title='Prompt One',
+                          content='Content one.', collection_id='100')
+        prompt_2 = Prompt(id='1', title='Duplicate Prompt',
+                          content='Content two.', collection_id='100')
         storage.create_prompt(prompt_1)
         # Simulate attempt to create prompt with duplicate ID via an update scenario
         storage.update_prompt('1', prompt_2)
@@ -101,9 +103,12 @@ class TestEdgeCases:
 
     def test_get_prompts_by_collection(self, storage):
         """Test retrieving prompts for a specific collection returns correct prompts."""
-        prompt_1 = Prompt(id='1', title='Prompt One', content='Content one.', collection_id='100')
-        prompt_2 = Prompt(id='2', title='Prompt Two', content='Content two.', collection_id='100')
-        prompt_3 = Prompt(id='3', title='Prompt Three', content='Content three.', collection_id='200')
+        prompt_1 = Prompt(id='1', title='Prompt One',
+                          content='Content one.', collection_id='100')
+        prompt_2 = Prompt(id='2', title='Prompt Two',
+                          content='Content two.', collection_id='100')
+        prompt_3 = Prompt(id='3', title='Prompt Three',
+                          content='Content three.', collection_id='200')
         storage.create_prompt(prompt_1)
         storage.create_prompt(prompt_2)
         storage.create_prompt(prompt_3)

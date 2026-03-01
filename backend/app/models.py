@@ -93,6 +93,7 @@ class PromptUpdate(PromptBase):
     collection_id: Optional[str] = None
     pass
 
+
 class PromptPatch(BaseModel):
     """Model for partially updating a Prompt.
 

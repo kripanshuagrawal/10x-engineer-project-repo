@@ -31,9 +31,8 @@ class Storage:
         self._collections: Dict[str, Collection] = {}
         self._prompt_versions: Dict[str, List[Dict[str, str]]] = {}
 
-    
     # ============== Prompt Operations ==============
-    
+
     def create_prompt(self, prompt: Prompt) -> Prompt:
         """Adds a new prompt to the storage.
 
@@ -52,7 +51,7 @@ class Storage:
         """
         self._prompts[prompt.id] = prompt
         return prompt
-    
+
     def get_prompt(self, prompt_id: str) -> Optional[Prompt]:
         """Retrieves a prompt from storage by its unique identifier.
 
@@ -71,7 +70,7 @@ class Storage:
                 print("Prompt not found.")
         """
         return self._prompts.get(prompt_id)
-    
+
     def get_all_prompts(self) -> List[Prompt]:
         """Retrieves all stored prompts as a list.
 
@@ -90,7 +89,7 @@ class Storage:
                 print(prompt)
         """
         return list(self._prompts.values())
-    
+
     def update_prompt(self, prompt_id: str, prompt: Prompt) -> Optional[Prompt]:
         """Updates an existing prompt with the given prompt data.
 
@@ -117,7 +116,7 @@ class Storage:
             return None
         self._prompts[prompt_id] = prompt
         return prompt
-    
+
     def delete_prompt(self, prompt_id: str) -> bool:
         """Deletes a prompt from the storage by its ID.
 
@@ -142,9 +141,9 @@ class Storage:
             del self._prompts[prompt_id]
             return True
         return False
-    
+
     # ============== Collection Operations ==============
-    
+
     def create_collection(self, collection: Collection) -> Collection:
         """Creates and stores a collection within the storage system.
 
@@ -167,7 +166,7 @@ class Storage:
         """
         self._collections[collection.id] = collection
         return collection
-    
+
     def get_collection(self, collection_id: str) -> Optional[Collection]:
         """Retrieve a collection by its ID.
 
@@ -189,7 +188,7 @@ class Storage:
                 print("Collection not found.")
         """
         return self._collections.get(collection_id)
-    
+
     def get_all_collections(self) -> List[Collection]:
         """Retrieve all collections stored in the system.
 
@@ -209,7 +208,7 @@ class Storage:
                 print(collection.name, collection.id)
         """
         return list(self._collections.values())
-    
+
     def delete_collection(self, collection_id: str) -> bool:
         """Deletes a collection by its ID.
 
@@ -230,7 +229,7 @@ class Storage:
             del self._collections[collection_id]
             return True
         return False
-    
+
     def get_prompts_by_collection(self, collection_id: str) -> List[Prompt]:
         """Retrieve prompts associated with a specific collection.
 
@@ -254,9 +253,9 @@ class Storage:
                 print(prompt.name)
         """
         return [p for p in self._prompts.values() if p.collection_id == collection_id]
-    
+
     # ============== Utility ==============
-    
+
     def clear(self):
         """Clears all stored prompts and collections.
 
@@ -325,7 +324,6 @@ class Storage:
         """
         return any(collection.name == name for collection in self._collections.values())
 
-
     def get_prompt_by_id_and_collection(self, prompt_id: str, collection_id: str) -> Optional[Prompt]:
         """Retrieve a prompt by its ID that belongs to a specific collection.
 
@@ -353,7 +351,7 @@ class Storage:
             List[Dict[str, str]]: A list of version data dictionaries for the given prompt ID.
         """
         return self._prompt_versions.get(prompt_id, [])
-    
+
     def save_prompt_version(self, prompt_id: str, version_data: Dict[str, str]) -> None:
         """Save a version of a prompt.
 
@@ -363,9 +361,9 @@ class Storage:
         """
         if prompt_id not in self._prompt_versions:
             self._prompt_versions[prompt_id] = []
-        
+
         self._prompt_versions[prompt_id].append(version_data)
+
 
 # Global storage instance
 storage = Storage()
-

@@ -1,6 +1,6 @@
 """FastAPI routes for PromptLab"""
 
-from fastapi import FastAPI, HTTPException, status, Path, Depends
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, Dict, List
 import re
@@ -90,21 +90,21 @@ def list_prompts(
         >>> list_prompts(search='example query')
     """
     prompts = storage.get_all_prompts()
-    
+
     # Filter by collection if specified
     if collection_id:
         collection = storage.get_collection(collection_id)
         if not collection:
             raise HTTPException(status_code=400, detail="Collection not found")
         prompts = filter_prompts_by_collection(prompts, collection_id)
-    
+
     # Search if query provided
     if search:
         prompts = search_prompts(prompts, search)
-    
+
     # Sort by date (newest first)
     prompts = sort_prompts_by_date(prompts, descending=True)
-    
+
     return PromptList(prompts=prompts, total=len(prompts))
 
 
@@ -133,7 +133,7 @@ def get_prompt(prompt_id: str):
     is_valid, error_message = validate_prompt_id(prompt_id)
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_message)
-    
+
     # Retrieve the prompt using the provided ID
     prompt = storage.get_prompt(prompt_id)
 
@@ -142,7 +142,7 @@ def get_prompt(prompt_id: str):
         raise HTTPException(status_code=404, detail="Prompt not found")
     # Return the found prompt
     return prompt
-    
+
 
 @app.post("/prompts", response_model=Prompt, status_code=201)
 def create_prompt(prompt_data: PromptCreate):
@@ -186,12 +186,14 @@ def create_prompt(prompt_data: PromptCreate):
         collection = storage.get_collection(prompt_data.collection_id)
         if not collection:
             raise HTTPException(status_code=400, detail="Collection not found")
-    
+
     # Check for duplicate title
-    existing_prompt = storage.get_prompt_by_title(prompt_data.title, prompt_data.collection_id)
+    existing_prompt = storage.get_prompt_by_title(
+        prompt_data.title, prompt_data.collection_id)
     if existing_prompt:
-        raise HTTPException(status_code=409, detail="Prompt with this title already exists")
-    
+        raise HTTPException(
+            status_code=409, detail="Prompt with this title already exists")
+
     prompt = Prompt(**prompt_data.model_dump())
     return storage.create_prompt(prompt)
 
@@ -221,17 +223,17 @@ def update_prompt(prompt_id: str, prompt_data: PromptUpdate):
     is_valid, error_message = validate_prompt_id(prompt_id)
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_message)
-    
+
     existing = storage.get_prompt(prompt_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Prompt not found")
-    
+
     # Validate collection if provided
     if prompt_data.collection_id:
         collection = storage.get_collection(prompt_data.collection_id)
         if not collection:
             raise HTTPException(status_code=400, detail="Collection not found")
-    
+
     updated_prompt = Prompt(
         id=existing.id,
         title=prompt_data.title,
@@ -241,7 +243,7 @@ def update_prompt(prompt_id: str, prompt_data: PromptUpdate):
         created_at=existing.created_at,
         updated_at=get_current_time()  # Corrected to use current time
     )
-    
+
     return storage.update_prompt(prompt_id, updated_prompt)
 
 
@@ -276,10 +278,11 @@ def patch_prompt(prompt_id: str, prompt_data: PromptPatch):
     existing = storage.get_prompt(prompt_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Prompt not found")
-    
+
     # Utilize utility to apply partial updates
     updated_prompt = apply_partial_updates(existing, prompt_data)
     return storage.update_prompt(prompt_id, updated_prompt)
+
 
 @app.delete("/prompts/{prompt_id}", status_code=204)
 def delete_prompt(prompt_id: str):
@@ -299,12 +302,12 @@ def delete_prompt(prompt_id: str):
 
         >>> delete_prompt("example_prompt_id")
     """
-    
+
     # Validate prompt ID format using the utility function
     is_valid, error_message = validate_prompt_id(prompt_id)
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_message)
-    
+
     if not storage.delete_prompt(prompt_id):
         raise HTTPException(status_code=404, detail="Prompt not found")
     return None
@@ -357,12 +360,12 @@ def get_collection(collection_id: str):
     print("---------------------- Collection ID ------------" + collection_id)
     if not collection_id or collection_id.strip() == '':
         raise HTTPException(status_code=422, detail="Collection ID is empty")
-    
+
     collection = storage.get_collection(collection_id)
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
     return collection
-    
+
 
 @app.post("/collections", response_model=Collection, status_code=201)
 def create_collection(collection_data: CollectionCreate):
@@ -390,14 +393,14 @@ def create_collection(collection_data: CollectionCreate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid collection name '{collection_data.name}'. Only alphanumeric characters, spaces, '-', and '&' are allowed."
         )
-    
+
     # Check for duplicate collection name.
     if storage.collection_exists_by_name(collection_data.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Collection '{collection_data.name}' already exists"
         )
-    
+
     collection = Collection(**collection_data.model_dump())
     return storage.create_collection(collection)
 
@@ -434,13 +437,14 @@ def delete_collection(collection_id: str):
     """
     if not storage.delete_collection(collection_id):
         raise HTTPException(status_code=404, detail="Collection not found")
-    
+
     # Handle orphaned prompts
     prompts = storage.get_prompts_by_collection(collection_id)
     for prompt in prompts:
         # Option 1: Delete the prompts
         storage.delete_prompt(prompt.id)
     return None
+
 
 @app.post("/collections/{collection_id}/prompts/{prompt_id}/version", response_model=Dict[str, str], status_code=201)
 def create_prompt_version(collection_id: str, prompt_id: str, version_data: VersionRequest) -> Dict[str, str]:
@@ -485,11 +489,13 @@ def create_prompt_version(collection_id: str, prompt_id: str, version_data: Vers
     collection = storage.get_collection(collection_id)
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
-    
-    existing_prompt = storage.get_prompt_by_id_and_collection(prompt_id, collection_id)
+
+    existing_prompt = storage.get_prompt_by_id_and_collection(
+        prompt_id, collection_id)
     if not existing_prompt:
-        raise HTTPException(status_code=404, detail="Prompt not found in the specified collection")
-    
+        raise HTTPException(
+            status_code=404, detail="Prompt not found in the specified collection")
+
     # Ensure there's an actual change in content
     if existing_prompt.content.strip() == version_data.updated_content.strip():
         raise HTTPException(status_code=400, detail="No actual content change")
@@ -497,7 +503,7 @@ def create_prompt_version(collection_id: str, prompt_id: str, version_data: Vers
     # Create a new version ID
     version_id = str(uuid.uuid4())
     version_timestamp = datetime.utcnow()
-    
+
     # Construct the new version data
     new_version = {
         "version_id": version_id,
@@ -511,7 +517,7 @@ def create_prompt_version(collection_id: str, prompt_id: str, version_data: Vers
 
     # Simulating a storage mechanism for storing a new version
     storage.save_prompt_version(prompt_id, new_version)
-    
+
     return {
         "version_id": version_id,
         "prompt_id": prompt_id,
@@ -546,12 +552,14 @@ async def get_prompt_versions(collection_id: str, prompt_id: str) -> List[Dict[s
     """
     prompt = storage.get_prompt_by_id_and_collection(prompt_id, collection_id)
     if not prompt:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Prompt not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Prompt not found")
 
     versions = storage.get_versions_by_prompt(prompt_id)
     return versions
 
 # ============== Revert Prompt Version Endpoint ==============
+
 
 @app.post("/collections/{collection_id}/prompts/{prompt_id}/revert", response_model=Dict[str, str])
 def revert_to_prompt_version(collection_id: str, prompt_id: str, version_request: Dict[str, str]):
@@ -607,7 +615,7 @@ def revert_to_prompt_version(collection_id: str, prompt_id: str, version_request
         raise HTTPException(status_code=404, detail="Prompt not found")
 
     # Retrieve the target version
-    target_version = next((version for version in storage.get_versions_by_prompt(prompt_id) 
+    target_version = next((version for version in storage.get_versions_by_prompt(prompt_id)
                            if version["version_id"] == target_version_id), None)
     if not target_version:
         raise HTTPException(status_code=404, detail="Version not found")
@@ -629,7 +637,7 @@ def revert_to_prompt_version(collection_id: str, prompt_id: str, version_request
             "content": prompt.content,
             "changes_summary": f"Reverted to version {target_version['version_id']}"
         })
-        
+
         return {
             "version_id": version_id,
             "prompt_id": prompt_id,
@@ -641,6 +649,7 @@ def revert_to_prompt_version(collection_id: str, prompt_id: str, version_request
     return {"detail": "Target version is the current version; no changes made."}
 
 # ============== Version Diff Endpoint ==============
+
 
 @app.get("/collections/{collection_id}/prompts/{prompt_id}/versions/diff", response_model=Dict[str, List[str]])
 def get_version_diff(
@@ -697,9 +706,9 @@ Example:
         raise HTTPException(status_code=404, detail="Prompt not found")
 
     # Retrieve both versions
-    first_version = next((version for version in storage.get_versions_by_prompt(prompt_id) 
+    first_version = next((version for version in storage.get_versions_by_prompt(prompt_id)
                           if version["version_id"] == first_version_id), None)
-    second_version = next((version for version in storage.get_versions_by_prompt(prompt_id) 
+    second_version = next((version for version in storage.get_versions_by_prompt(prompt_id)
                            if version["version_id"] == second_version_id), None)
 
     if not first_version or not second_version:
@@ -712,4 +721,3 @@ Example:
 
     # Return differences; no changes return empty list
     return {"differences": differences}
-

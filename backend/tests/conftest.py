@@ -17,7 +17,6 @@ def clear_storage():
     """Clear storage before each test."""
     storage.clear()
     yield
-    storage.clear()
 
 
 @pytest.fixture
@@ -25,7 +24,8 @@ def sample_prompt_data():
     """Sample prompt data for testing."""
     return {
         "title": "Code Review Prompt",
-        "content": "Review the following code and provide feedback:\n\n{{code}}",
+        "content": ("Review the following code and provide "
+                    "feedback:\n\n{{code}}"),
         "description": "A prompt for AI code review"
     }
 

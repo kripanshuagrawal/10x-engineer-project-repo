@@ -60,8 +60,9 @@ def sample_prompt_id() -> str:
 def test_get_prompt_versions_success(sample_collection_id, sample_prompt_id):
     """Test successfully retrieving prompt versions."""
     response = client.get(
-        f"/collections/{sample_collection_id}/prompts" +
-        "/{sample_prompt_id}/versions")
+        f"/collections/{sample_collection_id}/prompts/"
+        f"{sample_prompt_id}/versions"
+    )
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 

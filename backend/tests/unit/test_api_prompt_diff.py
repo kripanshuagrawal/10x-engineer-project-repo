@@ -6,6 +6,7 @@ from app.models import Prompt, Collection
 
 client = TestClient(app)
 
+
 @pytest.fixture
 def setup_prompts_with_versions():
     # Clear existing data for isolated testing
@@ -18,7 +19,12 @@ def setup_prompts_with_versions():
 
     # Create a prompt
     prompt_id = "test_prompt"
-    prompt = Prompt(id=prompt_id, title="Initial Title", content="Initial Content", collection_id=collection_id)
+    prompt = Prompt(
+        id=prompt_id,
+        title="Initial Title",
+        content="Initial Content",
+        collection_id=collection_id
+    )
     storage.create_prompt(prompt)
 
     # Add versions
@@ -47,7 +53,9 @@ def setup_prompts_with_versions():
 
 def test_get_version_diff_success(setup_prompts_with_versions):
     collection_id, prompt_id = setup_prompts_with_versions
-    response = client.get(f"/collections/{collection_id}/prompts/{prompt_id}/versions/diff?first_version_id=v1&second_version_id=v2")
+    response = client.get(
+        f"/collections/{collection_id}/prompts/{prompt_id}/versions/diff"
+        f"?first_version_id=v1&second_version_id=v2")
     assert response.status_code == 200
     data = response.json()
     assert "differences" in data
@@ -56,7 +64,10 @@ def test_get_version_diff_success(setup_prompts_with_versions):
 
 def test_get_version_diff_no_difference(setup_prompts_with_versions):
     collection_id, prompt_id = setup_prompts_with_versions
-    response = client.get(f"/collections/{collection_id}/prompts/{prompt_id}/versions/diff?first_version_id=v2&second_version_id=v2")
+    response = client.get(
+        f"/collections/{collection_id}/prompts/{prompt_id}/versions/diff"
+        f"?first_version_id=v2&second_version_id=v2"
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["differences"] == []  # Expect no differences
@@ -64,5 +75,8 @@ def test_get_version_diff_no_difference(setup_prompts_with_versions):
 
 def test_get_version_diff_nonexistent_version(setup_prompts_with_versions):
     collection_id, prompt_id = setup_prompts_with_versions
-    response = client.get(f"/collections/{collection_id}/prompts/{prompt_id}/versions/diff?first_version_id=nonexistent&second_version_id=v2")
+    response = client.get(
+        f"/collections/{collection_id}/prompts/{prompt_id}/versions/diff"
+        f"?first_version_id=nonexistent&second_version_id=v2"
+    )
     assert response.status_code == 404

@@ -2,10 +2,11 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from app.storage import storage
-from app.models import Prompt, Collection, VersionRequest
+from app.models import Prompt, Collection
 from typing import Dict  # Import Dict for the request data typing
 
 client = TestClient(app)
+
 
 @pytest.fixture
 def setup_prompts_and_versions():
@@ -19,7 +20,8 @@ def setup_prompts_and_versions():
 
     # Create a prompt
     prompt_id = "test_prompt"
-    prompt = Prompt(id=prompt_id, title="Original Title", content="Original Content", collection_id=collection_id)
+    prompt = Prompt(id=prompt_id, title="Original Title",
+                    content="Original Content", collection_id=collection_id)
     storage.create_prompt(prompt)
 
     # Create a version
@@ -43,11 +45,13 @@ def test_revert_prompt_success(setup_prompts_and_versions):
     target_version_id = "version_1"
     # Use a simple dict to represent the request body
     request_data: Dict[str, str] = {"target_version_id": target_version_id}
-    response = client.post(f"/collections/{collection_id}/prompts/{prompt_id}/revert", json=request_data)
-    
+    url = f"/collections/{collection_id}/prompts/{prompt_id}/revert"
+    response = client.post(url, json=request_data)
+
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data["detail"] == "Target version is the current version; no changes made."
+    assert response_data["detail"] == (
+        "Target version is the current version; no changes made.")
 
 
 def test_revert_prompt_nonexistent_version(setup_prompts_and_versions):
@@ -56,8 +60,9 @@ def test_revert_prompt_nonexistent_version(setup_prompts_and_versions):
     target_version_id = "nonexistent_version"
     # Use a simple dict to represent the request body
     request_data: Dict[str, str] = {"target_version_id": target_version_id}
-    response = client.post(f"/collections/{collection_id}/prompts/{prompt_id}/revert", json=request_data)
-    
+    url = f"/collections/{collection_id}/prompts/{prompt_id}/revert"
+    response = client.post(url, json=request_data)
+
     assert response.status_code == 404
 
 
@@ -67,9 +72,10 @@ def test_revert_prompt_to_current_version(setup_prompts_and_versions):
     target_version_id = "version_1"
     # Use a simple dict to represent the request body
     request_data: Dict[str, str] = {"target_version_id": target_version_id}
-    response = client.post(f"/collections/{collection_id}/prompts/{prompt_id}/revert", json=request_data)
-    
-    # Assuming this should just pass silently with no effect or create a new version
-    # The expected behavior needs to be explicitly defined in the application logic
-    assert response.status_code == 200  # Assuming success or no-op
+    url = f"/collections/{collection_id}/prompts/{prompt_id}/revert"
+    response = client.post(url, json=request_data)
 
+    # Assuming this should just pass silently with no effect or create
+    # a new version The expected behavior needs to be explicitly defined
+    # in the application logic
+    assert response.status_code == 200  # Assuming success or no-op

@@ -7,6 +7,7 @@ from app.models import Collection, Prompt
 
 client = TestClient(app)
 
+
 @pytest.fixture
 def setup_versions():
     # Clear existing data for isolated testing
@@ -19,7 +20,9 @@ def setup_versions():
 
     # Create a prompt
     prompt_id = "prompt_for_perf"
-    prompt = Prompt(id=prompt_id, title="Performance Title", content="Performance Content", collection_id=collection_id)
+    prompt = Prompt(id=prompt_id, title="Performance Title",
+                    content="Performance Content",
+                    collection_id=collection_id)
     storage.create_prompt(prompt)
 
     # Add initial versions
@@ -40,7 +43,9 @@ def test_version_retrieval_performance(setup_versions):
     start_time = time.time()
 
     collection_id, prompt_id = setup_versions  # Use values from the fixture
-    response = client.get(f"/collections/{collection_id}/prompts/{prompt_id}/versions")
+    response = client.get(
+        f"/collections/{collection_id}/prompts/{prompt_id}/versions"
+    )
 
     end_time = time.time()
     duration = end_time - start_time
@@ -58,7 +63,10 @@ def test_version_creation_performance(setup_versions):
         "updated_content": "Performance test content",
         "changes_summary": "Performance optimization"
     }
-    response = client.post(f"/collections/{collection_id}/prompts/{prompt_id}/version", json=new_version_data)
+    response = client.post(
+        f"/collections/{collection_id}/prompts/{prompt_id}/version",
+        json=new_version_data
+    )
 
     end_time = time.time()
     duration = end_time - start_time

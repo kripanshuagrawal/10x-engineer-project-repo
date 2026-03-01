@@ -17,7 +17,10 @@ class TestStoragePromptOperations:
     def test_create_prompt(self, storage):
         """Test creating a prompt adds it to storage."""
         prompt = Prompt(
-            id='1', title='Test Prompt', content='This is a test prompt.', collection_id='100'
+            id='1',
+            title='Test Prompt',
+            content='This is a test prompt.',
+            collection_id='100'
         )
         stored_prompt = storage.create_prompt(prompt)
         assert stored_prompt == prompt
@@ -30,11 +33,17 @@ class TestStoragePromptOperations:
     def test_update_prompt(self, storage):
         """Test updating an existing prompt modifies it in storage."""
         prompt = Prompt(
-            id='2', title='Old Title', content='Old content.', collection_id='100'
+            id='2',
+            title='Old Title',
+            content='Old content.',
+            collection_id='100'
         )
         storage.create_prompt(prompt)
         updated_prompt = Prompt(
-            id='2', title='New Title', content='New content.', collection_id='100'
+            id='2',
+            title='New Title',
+            content='New content.',
+            collection_id='100'
         )
         storage.update_prompt('2', updated_prompt)
         assert storage.get_prompt('2').title == 'New Title'
@@ -42,7 +51,10 @@ class TestStoragePromptOperations:
     def test_delete_prompt(self, storage):
         """Test deleting a prompt removes it from storage."""
         prompt = Prompt(
-            id='3', title='To Be Deleted', content='Content to be deleted.', collection_id='100'
+            id='3',
+            title='To Be Deleted',
+            content='Content to be deleted.',
+            collection_id='100'
         )
         storage.create_prompt(prompt)
         assert storage.delete_prompt('3') is True
@@ -77,7 +89,10 @@ class TestUtilityFunctions:
     def test_clear_storage(self, storage):
         """Test clearing storage removes all prompts and collections."""
         prompt = Prompt(
-            id='1', title='Test Prompt', content='Content.', collection_id='100'
+            id='1',
+            title='Test Prompt',
+            content='Content.',
+            collection_id='100'
         )
         collection = Collection(id='10', name='Test Collection')
         storage.create_prompt(prompt)
@@ -91,18 +106,21 @@ class TestEdgeCases:
     """Tests for edge cases in storage operations."""
 
     def test_create_duplicate_prompt_ids(self, storage):
-        """Test creating prompts with duplicate IDs does not overwrite existing prompt."""
+        """Test creating prompts with duplicate IDs does not
+        overwrite existing prompt."""
         prompt_1 = Prompt(id='1', title='Prompt One',
                           content='Content one.', collection_id='100')
         prompt_2 = Prompt(id='1', title='Duplicate Prompt',
                           content='Content two.', collection_id='100')
         storage.create_prompt(prompt_1)
-        # Simulate attempt to create prompt with duplicate ID via an update scenario
+        # Simulate attempt to create prompt with duplicate ID via
+        # an update scenario
         storage.update_prompt('1', prompt_2)
         assert storage.get_prompt('1').title == 'Duplicate Prompt'
 
     def test_get_prompts_by_collection(self, storage):
-        """Test retrieving prompts for a specific collection returns correct prompts."""
+        """Test retrieving prompts for a specific collection returns
+        correct prompts."""
         prompt_1 = Prompt(id='1', title='Prompt One',
                           content='Content one.', collection_id='100')
         prompt_2 = Prompt(id='2', title='Prompt Two',

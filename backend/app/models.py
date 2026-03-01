@@ -17,7 +17,8 @@ def generate_id() -> str:
 
     Usage Example:
         >>> unique_id = generate_id()
-        >>> print(unique_id)  # Example output: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+        >>> print(unique_id)
+        # e.g. output: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
     """
     return str(uuid4())
 
@@ -25,7 +26,8 @@ def generate_id() -> str:
 def get_current_time() -> datetime:
     """Returns the current UTC date and time.
 
-    This function retrieves the current date and time in UTC (Coordinated Universal Time) using
+    This function retrieves the current date
+    and time in UTC (Coordinated Universal Time) using
     the `datetime` module.
 
     Returns:
@@ -43,17 +45,20 @@ def get_current_time() -> datetime:
 class PromptBase(BaseModel):
     """Base model for creating a prompt.
 
-    This model serves as the blueprint for creating a prompt, validating necessary fields, and
+    This model serves as the blueprint for creating a prompt,
+    validating necessary fields, and
     offering optional fields with constraints.
 
     Attributes:
-        title (str): The title of the prompt. Must be between 1 and 200 characters.
+        title (str): The title of the prompt. Must be between 1 and 200 chars.
         content (str): The content of the prompt. Must be at least 1 character.
-        description (Optional[str]): An optional description of the prompt with a maximum of 500 characters.
-        collection_id (Optional[str]): An optional field to associate the prompt with a collection.
+        description (Optional[str]): An optional description of the prompt
+        with a maximum of 500 characters.
+        collection_id (Optional[str]): An optional field
+        to associate the prompt with a collection.
 
     Usage Example:
-        prompt = PromptBase(title="Sample Title", content="This is a sample prompt.")
+        prompt = PromptBase(title="Sample Title", content="sample prompt.")
     """
 
     title: str = Field(None, min_length=1, max_length=200)
@@ -67,11 +72,11 @@ class PromptCreate(PromptBase):
 
     Inherits from `PromptBase` and provides validation for prompt creation.
 
-    Since this class does not add additional attributes or methods, its functionality and usage
-    are identical to the `PromptBase`.
+    Since this class does not add additional attributes or methods,
+    its functionality and usage are identical to the `PromptBase`.
 
     Usage Example:
-        new_prompt = PromptCreate(title="New Title", content="This is the content for the new prompt.")
+    new_prompt = PromptCreate(title="New Title", content="content new prompt.")
     """
     pass
 
@@ -81,11 +86,12 @@ class PromptUpdate(PromptBase):
 
     Inherits from `PromptBase` and provides validation for updating prompts.
 
-    Like `PromptCreate`, this class does not add any new attributes or methods, thus its functionality
-    matches that of the `PromptBase`.
+    Like `PromptCreate`, this class does not add any new attributes or methods,
+    thus its functionality matches that of the `PromptBase`.
 
     Usage Example:
-        updated_prompt = PromptUpdate(title="Updated Title", content="Updated content of the prompt.")
+    updated_prompt = PromptUpdate(title="Updated Title",
+    content="Updated content")
     """
     title: Optional[str] = Field(None, min_length=1, max_length=200)
     content: Optional[str] = Field(None, min_length=1)
@@ -126,11 +132,14 @@ class Prompt(PromptBase):
 
     Attributes:
         id (str): A unique identifier for the prompt, generated using UUID4.
-        created_at (datetime): The timestamp of when the prompt was created, set to the current UTC time by default.
-        updated_at (datetime): The timestamp of when the prompt was last updated, initially set to the current UTC time.
+        created_at (datetime): The timestamp of when the prompt was created,
+        set to the current UTC time by default.
+        updated_at (datetime): The timestamp of when the prompt was
+        last updated, initially set to the current UTC time.
 
     Configuration:
-        from_attributes (bool): A flag indicating if attributes can be set from a dictionary.
+        from_attributes (bool): A flag indicating if attributes can be set
+        from a dictionary.
 
     Examples:
         Creating a new Prompt instance:
@@ -142,7 +151,8 @@ class Prompt(PromptBase):
             >>> print(prompt.created_at)
 
     See Also:
-        `PromptBase`: The base class that holds essential fields for prompt data.
+        `PromptBase`: The base class that holds essential fields for
+        prompt data.
     """
 
     id: str = Field(default_factory=generate_id)
@@ -159,8 +169,10 @@ class CollectionBase(BaseModel):
     """A base model for a collection with a name and an optional description.
 
     Attributes:
-        name (str): The name of the collection. Must be between 1 and 100 characters long.
-        description (Optional[str]): An optional description for the collection with a maximum length of 500 characters.
+        name (str): The name of the collection. Must be
+        between 1 and 100 characters long.
+        description (Optional[str]): An optional description for
+        the collection with a maximum length of 500 characters.
     """
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
@@ -169,20 +181,25 @@ class CollectionBase(BaseModel):
 class CollectionCreate(CollectionBase):
     """A model for creating a collection, inheriting from CollectionBase.
 
-    Inherits all attributes from CollectionBase without modification or addition.
+    Inherits all attributes from CollectionBase without
+    modification or addition.
     """
     pass
 
 
 class Collection(CollectionBase):
-    """A model representing a stored collection, inheriting from CollectionBase.
+    """A model representing a stored collection,
+    inheriting from CollectionBase.
 
     Additional Attributes:
-        id (str): A unique identifier for the collection, generated automatically.
-        created_at (datetime): The timestamp when the collection was created, generated automatically.
+        id (str): A unique identifier for the collection,
+        generated automatically.
+        created_at (datetime): The timestamp when the collection was created,
+        generated automatically.
 
     Config:
-        from_attributes: Indicates configuration properties are derived from attributes.
+        from_attributes: Indicates configuration properties are derived
+        from attributes.
     """
     id: str = Field(default_factory=generate_id)
     created_at: datetime = Field(default_factory=get_current_time)

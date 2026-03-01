@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime
 from app.models import Prompt, PromptUpdate
 from app.utils import (
@@ -66,7 +65,9 @@ class TestUtils:
     def test_apply_partial_updates(self):
         """Test applying partial updates to a prompt."""
         existing_prompt = Prompt(
-            title="Old Title", content="Old Content", updated_at=datetime(2023, 1, 1))
+            title="Old Title",
+            content="Old Content",
+            updated_at=datetime(2023, 1, 1))
         updates = PromptUpdate(title="New Title")
         updated_prompt = apply_partial_updates(existing_prompt, updates)
         assert updated_prompt.title == "New Title"

@@ -5,12 +5,17 @@ from app.models import CollectionCreate, PromptCreate
 
 client = TestClient(app)
 
+
 @pytest.fixture
 def example_collection():
-    collection_data = CollectionCreate(name="Example Collection", description="A collection for testing")
+    collection_data = CollectionCreate(
+        name="Example Collection",
+        description="A collection for testing"
+    )
     response = client.post("/collections", json=collection_data.model_dump())
     assert response.status_code == 201
     return response.json()
+
 
 @pytest.fixture
 def example_prompt(example_collection):
@@ -31,8 +36,12 @@ def example_prompt(example_collection):
 
 
 def test_create_prompt_version_success(example_prompt):
+    url = (
+        f"/collections/{example_prompt['collection_id']}"
+        f"/prompts/{example_prompt['prompt_id']}/version"
+    )
     response = client.post(
-        f"/collections/{example_prompt['collection_id']}/prompts/{example_prompt['prompt_id']}/version",
+        url,
         json={
             "updated_content": example_prompt["updated_content"],
             "changes_summary": example_prompt["changes_summary"]
@@ -59,10 +68,17 @@ def test_create_prompt_version_invalid_ids():
 
 
 def test_create_prompt_version_no_content_change(example_prompt):
+    url = (
+        f"/collections/{example_prompt['collection_id']}"
+        f"/prompts/{example_prompt['prompt_id']}/version"
+    )
     response = client.post(
-        f"/collections/{example_prompt['collection_id']}/prompts/{example_prompt['prompt_id']}/version",
+        url,
         json={
-            "updated_content": "This is some example content for testing purposes.",
+            "updated_content": (
+                "This is some example content "
+                "for testing purposes."
+            ),
             "changes_summary": "No content change"
         }
     )

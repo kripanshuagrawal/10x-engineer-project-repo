@@ -79,7 +79,8 @@ class TestPrompts:
         assert create_collection_response.status_code == 201
         created_collection_id = create_collection_response.json()["id"]
 
-        # Once the collection is created, list prompts with this valid collection
+        # Once the collection is created, list prompts with this
+        # valid collection
         response = client.get(
             f'/prompts?collection_id={created_collection_id}')
         assert response.status_code == 200
@@ -116,7 +117,8 @@ class TestPrompts:
 
     # Query Parameter Tests
     def test_list_prompts_combined_filters(self):
-        """Test listing prompts with both collection filter and search query."""
+        """Test listing prompts with both collection filter and
+        search query."""
         # Create a collection first
         collection_data = {
             "name": "Combined Filter Collection",
@@ -135,7 +137,7 @@ class TestPrompts:
     def test_list_prompts_invalid_collection_id_format(self):
         """Test listing prompts with invalid collection ID format."""
         response = client.get('/prompts?collection_id=12345')
-        assert response.status_code == 400  # Assuming validation checks on UUID
+        assert response.status_code == 400
 # ============================================================================
     # TEST: Retrieve Prompt by ID
     # ============================================================================
@@ -147,22 +149,10 @@ class TestPrompts:
         assert response.status_code == 200
         assert response.json()['title'] == created_prompt['title']
 
-    def test_get_prompt_invalid_id_format(self):
-        """Test retrieving a prompt with an invalid ID format returns 400."""
-        response = client.get('/prompts/invalid-format')
-        assert response.status_code == 404
-
     def test_get_prompt_nonexistent_id(self):
         """Test retrieving a non-existent prompt ID returns 404."""
         response = client.get('/prompts/00000000-0000-0000-0000-000000000000')
         assert response.status_code == 404
-
-    def test_get_prompt_valid_id(self, created_prompt):
-        """Test retrieving a prompt with a valid ID."""
-        prompt_id = created_prompt['id']
-        response = client.get(f'/prompts/{prompt_id}')
-        assert response.status_code == 200
-        assert response.json()['title'] == created_prompt['title']
 
     def test_get_prompt_invalid_id_format(self):
         """Test retrieving a prompt with an invalid ID format returns 404."""
@@ -208,14 +198,18 @@ class TestPrompts:
         long_content = 'b' * 1024  # Assuming these lengths are excessive
         response = client.post(
             '/prompts', json={"title": long_title, "content": long_content})
-        assert response.status_code == 422  # Assuming validation fails for long input
+        assert response.status_code == 422
 
     def test_create_prompt_with_special_characters(self):
-        """Test creating a prompt with special characters in title and content."""
+        """Test creating a prompt with special characters in title
+        and content."""
         special_title = "!@#%^&*()_+=-[]{}|;:'<>,.?/~`"
         special_content = "Content!@#%^&*()"
         response = client.post(
-            '/prompts', json={"title": special_title, "content": special_content})
+            '/prompts', json={
+                "title": special_title,
+                "content": special_content
+            })
         assert response.status_code == 201
         assert response.json()['title'] == special_title
 
@@ -227,26 +221,11 @@ class TestPrompts:
         client.post('/prompts', json=prompt_data)  # Create the initial prompt
         # Attempt to create a duplicate
         response = client.post('/prompts', json=prompt_data)
-        assert response.status_code == 409  # Assuming 409 Conflict for duplicates
+        assert response.status_code == 409
 
     # ============================================================================
     # TEST: Update Prompt
     # ============================================================================
-
-    def test_update_prompt_valid_data(self, created_prompt):
-        """Test updating a prompt with valid data returns 200."""
-        prompt_id = created_prompt['id']
-        update_data = {"title": "Updated Title", "content": "Updated content"}
-        response = client.put(f'/prompts/{prompt_id}', json=update_data)
-        assert response.status_code == 200
-        updated_prompt = response.json()
-        assert updated_prompt['title'] == "Updated Title"
-
-    def test_update_prompt_nonexistent_id(self):
-        """Test updating a non-existent prompt returns 404."""
-        response = client.put('/prompts/00000000-0000-0000-0000-000000000000',
-                              json={"title": "Update", "content": "Updated Content"})
-        assert response.status_code == 404
 
     # Happy Path
     def test_update_prompt_valid_data(self, created_prompt):
@@ -261,8 +240,9 @@ class TestPrompts:
     # Error Cases
     def test_update_prompt_nonexistent_id(self):
         """Test updating a non-existent prompt returns 404."""
-        response = client.put('/prompts/00000000-0000-0000-0000-000000000000',
-                              json={"title": "Update", "content": "Updated Content"})
+        response = client.put(
+            '/prompts/00000000-0000-0000-0000-000000000000',
+            json={"title": "Update", "content": "Updated Content"})
         assert response.status_code == 404
 
     def test_update_prompt_invalid_id_format(self):
@@ -277,7 +257,8 @@ class TestPrompts:
         prompt_id = created_prompt['id']
         update_data = {"title": "", "content": ""}
         response = client.put(f'/prompts/{prompt_id}', json=update_data)
-        assert response.status_code == 422  # Assuming empty strings are invalid
+        # Assuming empty strings are invalid
+        assert response.status_code == 422
 
     def test_update_prompt_with_special_characters(self, created_prompt):
         """Test updating a prompt with special characters."""
@@ -329,12 +310,13 @@ class TestPrompts:
     def test_patch_prompt_with_special_characters(self, created_prompt):
         """Test patching a prompt with special characters."""
         prompt_id = created_prompt['id']
+        special_title = "!@#%^&*()_+=-[]{}|;:'<>,.?/~`"
         update_data = PromptPatch(
-            title="!@#%^&*()_+=-[]{}|;:'<>,.?/~`").model_dump(exclude_unset=True)
+            title=special_title).model_dump(exclude_unset=True)
         response = client.patch(f'/prompts/{prompt_id}', json=update_data)
         assert response.status_code == 200
         updated_prompt = response.json()
-        assert updated_prompt['title'] == "!@#%^&*()_+=-[]{}|;:'<>,.?/~`"
+        assert updated_prompt['title'] == special_title
     # ============================================================================
     # TEST: Delete Prompt
     # ============================================================================
@@ -358,22 +340,26 @@ class TestPrompts:
         assert 'not found' in response.json().get('detail', '').lower()
 
     def test_delete_prompt_empty_id(self):
-        """Test deletion of a prompt with empty ID should raise HTTPException."""
+        """Test deletion of a prompt with empty ID should raise
+        HTTPException."""
         response = client.delete('/prompts/')
         assert response.status_code == 405
 
     def test_delete_prompt_invalid_id_format(self):
-        """Test deletion with invalid ID format should trigger a handling mechanism."""
+        """Test deletion with invalid ID format should trigger a
+        handling mechanism."""
         response = client.delete('/prompts/invalid-format-!!!@@')
         assert response.status_code == 400
 
     # Edge Cases
     def test_delete_prompt_with_special_characters_in_id(self):
-        """Test deletion with special characters in ID should result in not found."""
+        """Test deletion with special characters in ID should result
+        in not found."""
         special_id = "special-!@#-characters"
         response = client.delete(f'/prompts/{special_id}')
         assert response.status_code == 400
-        assert 'malformed prompt id' in response.json().get('detail', '').lower()
+        detail = response.json().get('detail', '').lower()
+        assert 'malformed prompt id' in detail
 
 
 # ============================================================================
@@ -422,19 +408,28 @@ def nonexistent_collection_id():
 class TestListCollections:
     """Tests for listing collections."""
 
-    def test_list_collections_returns_200(self, api_client, created_collections):
+    def test_list_collections_returns_200(
+        self, api_client, created_collections
+    ):
         """Test successful list of collections returns 200."""
         response = api_client.get('/collections')
         assert response.status_code == 200
         collection_list = response.json()
 
-        assert len(collection_list['collections']) == len(created_collections)
+        assert (
+            len(collection_list['collections']) ==
+            len(created_collections)
+        )
         assert collection_list['total'] == len(created_collections)
         for idx, collection in enumerate(created_collections):
-            assert collection['name'] == collection_list['collections'][idx]['name']
+            assert (
+                collection['name'] ==
+                collection_list['collections'][idx]['name']
+            )
 
     def test_list_collections_empty_returns_200(self, api_client):
-        """Test listing collections when no collections exist returns empty list."""
+        """Test listing collections when no collections exist
+        returns empty list."""
         # Assuming this test runs in isolation without the fixture
         response = api_client.get('/collections')
         assert response.status_code == 200
@@ -449,21 +444,6 @@ class TestListCollections:
 
 
 @pytest.fixture
-def created_collection():
-    """Fixture that creates a collection and returns its data."""
-    collection_data = {"name": "Test Collection"}
-    response = client.post('/collections', json=collection_data)
-    assert response.status_code == 201, "Failed to create test collection"
-    return response.json()  # Returns created collection with ID
-
-
-@pytest.fixture
-def nonexistent_collection_id():
-    """Fixture that provides a non-existent collection ID."""
-    return "00000000-0000-0000-0000-000000000000"  # UUID that doesn't exist
-
-
-@pytest.fixture
 def valid_collection_data():
     """Fixture providing valid collection data."""
     return {
@@ -474,7 +454,7 @@ def valid_collection_data():
 
 @pytest.fixture
 def created_prompts(api_client, created_collection):
-    """Fixture creating multiple prompts associated with the created collection."""
+    """Fixture creating multiple prompts associated with a collection."""
     collection_id = created_collection['id']
     prompts = []
     for i in range(3):
@@ -503,7 +483,9 @@ class TestGetCollection:
         assert response.json()['id'] == collection_id
         assert 'name' in response.json()
 
-    def test_get_collection_with_nonexistent_id_returns_404(self, nonexistent_collection_id):
+    def test_get_collection_with_nonexistent_id_returns_404(
+        self, nonexistent_collection_id
+    ):
         """Test retrieval of collection with non-existent ID returns 404."""
         response = client.get(f'/collections/{nonexistent_collection_id}')
         assert response.status_code == 404
@@ -518,7 +500,9 @@ class TestCreateCollection:
     """Tests for creating a new collection."""
 
     # Happy Path
-    def test_create_collection_with_valid_data_returns_201(self, api_client, valid_collection_data):
+    def test_create_collection_with_valid_data_returns_201(
+        self, api_client, valid_collection_data
+    ):
         """Test creating collection with valid data returns 201."""
         response = api_client.post('/collections', json=valid_collection_data)
 
@@ -535,7 +519,9 @@ class TestCreateCollection:
         response = api_client.post('/collections', json=collection_data)
         assert response.status_code == 422
 
-    def test_create_collection_duplicate_name_returns_409(self, api_client, created_collection):
+    def test_create_collection_duplicate_name_returns_409(
+        self, api_client, created_collection
+    ):
         """Test creating a collection with a duplicate name returns 409."""
         duplicate_data = {
             "name": created_collection['name'],
@@ -592,13 +578,17 @@ class TestDeleteCollection:
     """Tests for deleting a collection."""
 
     # Happy Path
-    def test_delete_collection_successfully_returns_204(self, api_client, created_collection):
+    def test_delete_collection_successfully_returns_204(
+        self, api_client, created_collection
+    ):
         """Test successfully deleting a collection returns 204."""
         collection_id = created_collection['id']
         response = api_client.delete(f'/collections/{collection_id}')
         assert response.status_code == 204
 
-    def test_delete_collection_with_prompts_handles_orphans(self, api_client, created_collection, created_prompts):
+    def test_delete_collection_with_prompts_handles_orphans(
+        self, api_client, created_collection, created_prompts
+    ):
         """Test deleting a collection also handles orphaned prompts."""
         collection_id = created_collection['id']
 
@@ -619,7 +609,9 @@ class TestDeleteCollection:
         assert response.status_code == 404
 
     # Edge Cases
-    def test_delete_collection_concurrently(self, api_client, created_collection):
+    def test_delete_collection_concurrently(
+        self, api_client, created_collection
+    ):
         """Test concurrent deletions of the same collection."""
         collection_id = created_collection['id']
 

@@ -1,0 +1,1 @@
+Intended for API integrations and HTTP request logic, like Axios instances or fetch wrappers.

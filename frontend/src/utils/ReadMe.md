@@ -1,0 +1,1 @@
+Contains utility functions, helpers, or utilities that serve various parts of the application.

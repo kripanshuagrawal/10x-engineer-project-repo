@@ -1,0 +1,1 @@
+Houses the main components for each route in the application, functioning typically as containers that incorporate other components.

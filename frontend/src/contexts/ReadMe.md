@@ -1,0 +1,1 @@
+Used for React Context providers and consumers for managing global state or settings.

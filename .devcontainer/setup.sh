@@ -9,6 +9,9 @@ echo "Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
+echo "Installing Node.js dependencies..."
+npm install -g create-vite
+
 GIT_EMAIL=$(git config user.email)
 echo "Extracting username from $GIT_EMAIL..."
 

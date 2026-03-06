@@ -1,0 +1,1 @@
+Contains UI components that are reused across different pages, like buttons, cards, modals, etc.

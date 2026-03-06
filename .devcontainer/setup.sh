@@ -5,9 +5,18 @@ CONFIG_DIR="$HOME/.continue"
 CONFIG_FILE="$CONFIG_DIR/config.yaml"
 API_KEY="sk-helicone-2v7akjq-m2xueay-ttt23kq-hx57ubq"
 
+echo "Installing Docker..."
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+rm get-docker.sh
+echo "Docker installed successfully."
+
 echo "Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
+
+echo "Installing Node.js dependencies..."
+npm install -g create-vite
 
 GIT_EMAIL=$(git config user.email)
 echo "Extracting username from $GIT_EMAIL..."

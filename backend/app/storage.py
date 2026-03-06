@@ -248,6 +248,15 @@ class Storage:
             return True
         return False
 
+    def update_collection(
+        self, collection_id: str, updated_collection: "Collection"
+    ) -> Optional["Collection"]:
+        """Update an existing collection by its ID."""
+        if collection_id not in self._collections:
+            return None
+        self._collections[collection_id] = updated_collection
+        return updated_collection
+
     def get_prompts_by_collection(
         self, collection_id: str
     ) -> List[Prompt]:

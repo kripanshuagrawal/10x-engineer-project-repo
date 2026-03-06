@@ -1,6 +1,10 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
   "name": "Assessment B - Inventory API",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
 
   "postCreateCommand": "bash .devcontainer/setup.sh", 
 
@@ -13,7 +17,8 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "continue.continue"
+        "continue.continue",
+        "ms-azuretools.vscode-docker"
       ],
       "settings": {
         "files.autoSave": "afterDelay",

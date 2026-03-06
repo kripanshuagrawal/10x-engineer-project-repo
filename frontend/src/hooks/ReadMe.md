@@ -1,0 +1,1 @@
+Stores custom hooks that encapsulate React logic, which might be shared across different components or pages.

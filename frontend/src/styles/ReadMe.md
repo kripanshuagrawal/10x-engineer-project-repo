@@ -1,0 +1,1 @@
+For global styles, theme configurations, or CSS-in-JS utility setups.

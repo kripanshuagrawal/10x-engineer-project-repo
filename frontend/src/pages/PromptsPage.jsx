@@ -1,12 +1,32 @@
-import PromptList from '../components/PromptList.jsx';
+import { useState } from 'react';
+import PromptList from '../components/PromptList';
+import PromptEditor from '../components/PromptEditor';
+import { Page, PageHeader, Btn, Alert, Spinner } from '../components/ui.jsx';
+import { usePromptContext } from '../contexts/PromptContext';
 
-const PromptsPage = () => {
+export default function PromptsPage() {
+  const { prompts, loading, error, addPrompt, editPrompt, removePrompt, collectionId, setCollectionId, search, setSearch, fetchPrompts } = usePromptContext();
+  const [editingPrompt, setEditingPrompt] = useState(null);
+  const [showEditor, setShowEditor] = useState(false);
+
+  const handleSave = async (data) => {
+    if (editingPrompt) await editPrompt(editingPrompt.id, data);
+    else await addPrompt(data);
+    setEditingPrompt(null); setShowEditor(false);
+  };
+
   return (
-    <div>
-      <h1>Prompts Management</h1>
-      <PromptList />
-    </div>
+    <Page>
+      <PageHeader
+        title="Prompts"
+        subtitle={`${prompts.length} prompt${prompts.length !== 1 ? 's' : ''} in your library`}
+        action={!showEditor && <Btn variant="primary" size="sm" onClick={() => { setEditingPrompt(null); setShowEditor(true); }}>+ New Prompt</Btn>}
+      />
+      {showEditor && <PromptEditor existing={editingPrompt} onSave={handleSave} onCancel={() => { setShowEditor(false); setEditingPrompt(null); }} />}
+      {loading && <Spinner />}
+      {error && <div style={{ marginBottom: 12 }}><Alert variant="error">{error}</Alert></div>}
+      <PromptList prompts={prompts} onEdit={(p) => { setEditingPrompt(p); setShowEditor(true); }} onDelete={removePrompt}
+        search={search} setSearch={setSearch} collectionId={collectionId} setCollectionId={setCollectionId} onSearch={fetchPrompts} />
+    </Page>
   );
-};
-
-export default PromptsPage;
+}

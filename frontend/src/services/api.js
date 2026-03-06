@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Set up a base URL for the API endpoints
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api', // Replace with your backend API base URL
+  baseURL: 'https://fuzzy-couscous-xr6wjwjrpj72vgvp-8000.app.github.dev', // Replace with your backend API base URL
   headers: {
     'Content-Type': 'application/json',
   },

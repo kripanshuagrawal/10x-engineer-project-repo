@@ -21,7 +21,6 @@ from app.utils import (
 )
 from app import __version__
 
-
 app = FastAPI(
     title="PromptLab API",
     description="AI Prompt Engineering Platform",
@@ -36,7 +35,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # ============== Health Check ==============
 
@@ -436,6 +434,23 @@ def create_collection(collection_data: CollectionCreate):
     collection = Collection(**collection_data.model_dump())
     return storage.create_collection(collection)
 
+@app.put("/collections/{collection_id}", response_model=Collection)
+def update_collection(collection_id: str, collection_data: CollectionCreate):
+    """Update an existing collection by its ID."""
+    collection = storage.get_collection(collection_id)
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+
+    updated_collection = Collection(
+        id=collection.id,
+        name=collection_data.name,
+        description=collection_data.description,
+        created_at=collection.created_at
+    )
+    result = storage.update_collection(collection_id, updated_collection)
+    if not result:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    return result
 
 @app.delete("/collections/{collection_id}", status_code=204)
 def delete_collection(collection_id: str):
@@ -714,7 +729,7 @@ def revert_to_prompt_version(
             "version_id": version_id,
             "prompt_id": prompt_id,
             "collection_id": collection_id,
-            "version_number": version_number,
+            "version_number": str(version_number),
             "created_at": datetime.utcnow().isoformat(),
             "content": prompt.content,
             "changes_summary": revert_msg
@@ -724,7 +739,7 @@ def revert_to_prompt_version(
             "version_id": version_id,
             "prompt_id": prompt_id,
             "collection_id": collection_id,
-            "version_number": version_number,
+            "version_number": str(version_number),
             "created_at": datetime.utcnow().isoformat()
         }
 

@@ -38,6 +38,7 @@ app.add_middleware(
 
 # ============== Health Check ==============
 
+
 @app.get("/health", response_model=HealthResponse)
 def health_check():
     """Checks the health status of the API and returns it.
@@ -434,6 +435,7 @@ def create_collection(collection_data: CollectionCreate):
     collection = Collection(**collection_data.model_dump())
     return storage.create_collection(collection)
 
+
 @app.put("/collections/{collection_id}", response_model=Collection)
 def update_collection(collection_id: str, collection_data: CollectionCreate):
     """Update an existing collection by its ID."""
@@ -451,6 +453,7 @@ def update_collection(collection_id: str, collection_data: CollectionCreate):
     if not result:
         raise HTTPException(status_code=404, detail="Collection not found")
     return result
+
 
 @app.delete("/collections/{collection_id}", status_code=204)
 def delete_collection(collection_id: str):
